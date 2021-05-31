@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Methodik der empirischen Forschung</title>
+    <script src="jspsych-6.3.0/jspsych.js"></script>
+    <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.3.0/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="jspsych-6.3.0/plugins/jspsych-preload.js"></script>
+    <link href="jspsych-6.3.0/css/jspsych.css" rel="stylesheet" type="text/css">
+  </head>
+  <body></body>
+
+<script>
+var timeline = [];
+/*Willkommen + Aufgabe*/
+var welcome = {
+    type: "html-keyboard-response",
+    stimulus: "Willkommen zu diesem Experiment. Bitte beantworten Sie die folgenden Fragen und klicken Sie dann auf weiter."
+
+  };
+  timeline.push(welcome);
+
+  /*Erklärung*/
+  var instructions = {
+    type: "html-keyboard-response",
+    stimulus: `
+      <p>Bei diesem Experiment werden 4 weiße Kreise auf dem Bildschirm angezeigt.</p><p>Bitte legen Sie Ihre Finger auf die Tasten <strong>Y,X</strong> und <strong>N,M,</strong> diese repräsentieren je einen der Kreise</p>
+      <p>Wird aus einem weißen Kreis ein <strong>dunkel-grauer Kreis</strong>, so drücken Sie bitte so schnell Sie können die dazugehörige Taste.</p>
+      <p><strong>Beispiel:</strong></p>
+      <div style='width: 1000px; height: 400px;'>
+        <div style='float: left;'><img src='img/weiß.png' width="250" height="250"></img></div>
+        <div style='float: left;'><img src='img/weiß.png' width="250" height="250"></img></div>
+        <div style='float: left;'><img src='img/grau.png' width="250" height="250"></img>
+          <p class='small'><strong>Drücken Sie N</strong></p></div>
+        <div style='float: left;'><img src='img/weiß.png' width="250" height="250"></img></div>
+      </div>
+      <br>
+      <p>Drücken Sie eine beliebige Taste um anzufangen.</p>
+    `,
+    post_trial_gap: 2000
+  };
+  timeline.push(instructions);
+
+
+    /* test trials */
+    var test_stimuli = [
+      { stimulus: "img/blue.png",  correct_response: 'f'},
+      { stimulus: "img/orange.png",  correct_response: 'j'}
+    ];
+
+    var fixation = {
+      type: 'html-keyboard-response',
+      stimulus: '<div style="font-size:60px;">+</div>',
+      choices: jsPsych.NO_KEYS,
+      trial_duration: function(){
+        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+      },
+      data: {
+        task: 'fixation'
+      }
+    }
+
+    var test = {
+      type: "image-keyboard-response",
+      stimulus: jsPsych.timelineVariable('stimulus'),
+      choices: ['f', 'j'],
+      data: {
+        task: 'response',
+        correct_response: jsPsych.timelineVariable('correct_response')
+      },
+      on_finish: function(data){
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+      }
+    }
+
+    var test_procedure = {
+      timeline: [fixation, test],
+      timeline_variables: test_stimuli,
+      repetitions: 5,
+      randomize_order: true
+    }
+    timeline.push(test_procedure);
+
+    /* define debrief */
+
+    var debrief_block = {
+      type: "html-keyboard-response",
+      stimulus: function() {
+
+        var trials = jsPsych.data.get().filter({task: 'response'});
+        var correct_trials = trials.filter({correct: true});
+        var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+        var rt = Math.round(correct_trials.select('rt').mean());
+
+        return `<p>You responded correctly on ${accuracy}% of the trials.</p>
+          <p>Your average response time was ${rt}ms.</p>
+          <p>Press any key to complete the experiment. Thank you!</p>`;
+
+      }
+    };
+    timeline.push(debrief_block);
+
+    /* start the experiment */
+    jsPsych.init({
+      timeline: timeline,
+      on_finish: function() {
+        jsPsych.data.displayData();
+      }
+    });
+  </script>
+</html>
