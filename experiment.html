@@ -6,12 +6,23 @@
     <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-image-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-preload.js"></script>
+    <script src="jspsych-6.3.0/plugins/jspsych-serial-reaction-time.js"></script>
     <link href="jspsych-6.3.0/css/jspsych.css" rel="stylesheet" type="text/css">
   </head>
   <body></body>
 
 <script>
 var timeline = [];
+
+/*TODO:
+- Frage zum Alter und Geschlecht
+- Willkommen+Aufgabe anpassen mit den später gezeigten Kästchen
+- korrekte Reihenfolge implementieren
+- Zuordnung zu einer der 3 Gruppen
+- Musik, Störgeräusche und blank den Gruppen zuordnen
+- Datenbank zum Speichern der Ergebnisse
+*/
+
 /*Willkommen + Aufgabe*/
 var welcome = {
     type: "html-keyboard-response",
@@ -42,59 +53,50 @@ var welcome = {
   timeline.push(instructions);
 
 
-    /* test trials */
-    var test_stimuli = [
-      { stimulus: "img/blue.png",  correct_response: 'f'},
-      { stimulus: "img/orange.png",  correct_response: 'j'}
-    ];
-
-    var fixation = {
-      type: 'html-keyboard-response',
-      stimulus: '<div style="font-size:60px;">+</div>',
-      choices: jsPsych.NO_KEYS,
-      trial_duration: function(){
-        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
-      },
-      data: {
-        task: 'fixation'
-      }
-    }
-
-    var test = {
-      type: "image-keyboard-response",
-      stimulus: jsPsych.timelineVariable('stimulus'),
-      choices: ['f', 'j'],
-      data: {
+  /* test trials */
+  var trial = {
+  type: 'serial-reaction-time',
+  grid: [[1,1,1,1]],
+  target: jsPsych.timelineVariable('target'),
+  choices: [['y','x','n','m']],
+  data: {
         task: 'response',
         correct_response: jsPsych.timelineVariable('correct_response')
       },
       on_finish: function(data){
         data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
       }
-    }
+  }
+  
+    var test_stimuli = [
+      {target: [0,0], correct_response: 'y'},
+      {target: [0,1], correct_response: 'x'},
+      {target: [0,2], correct_response: 'n'},
+      {target: [0,3], correct_response: 'm'}
+    ];
 
     var test_procedure = {
-      timeline: [fixation, test],
+      timeline: [trial],
       timeline_variables: test_stimuli,
       repetitions: 5,
-      randomize_order: true
+      //randomize_order: true
     }
     timeline.push(test_procedure);
 
     /* define debrief */
-
     var debrief_block = {
       type: "html-keyboard-response",
       stimulus: function() {
 
         var trials = jsPsych.data.get().filter({task: 'response'});
+        console.log(trials.count());
         var correct_trials = trials.filter({correct: true});
         var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
         var rt = Math.round(correct_trials.select('rt').mean());
 
-        return `<p>You responded correctly on ${accuracy}% of the trials.</p>
-          <p>Your average response time was ${rt}ms.</p>
-          <p>Press any key to complete the experiment. Thank you!</p>`;
+        return `<p>Sie haben in ${accuracy}% der Fälle die korrekte Taste gedrückt.</p>
+          <p>Ihre durchschnittliche Reaktionszeit betrug ${rt}ms.</p>
+          <p>Drücken Sie eine beliebige Taste um das Experiment abzuschließen. Vielen Dank!</p>`;
 
       }
     };
