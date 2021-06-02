@@ -15,10 +15,11 @@
 var timeline = [];
 
 /*TODO:
-- Frage zum Alter und Geschlecht
-- Willkommen+Aufgabe anpassen mit den später gezeigten Kästchen
-- korrekte Reihenfolge implementieren
+- Frage zum Alter und Geschlecht (Formular??)
+X Willkommen+Aufgabe anpassen mit den später gezeigten Kästchen
+X korrekte Reihenfolge implementieren
 - Zuordnung zu einer der 3 Gruppen
+- 2. Reihenfolge implementieren
 - Musik, Störgeräusche und blank den Gruppen zuordnen
 - Datenbank zum Speichern der Ergebnisse
 */
@@ -26,27 +27,44 @@ var timeline = [];
 /*Willkommen + Aufgabe*/
 var welcome = {
     type: "html-keyboard-response",
-    stimulus: "Willkommen zu diesem Experiment. Bitte beantworten Sie die folgenden Fragen und klicken Sie dann auf weiter."
-
+    stimulus: "Willkommen zu diesem Experiment. Bitte drücken Sie eine beliebige Taste."
   };
   timeline.push(welcome);
+
+// Persönliche Angaben (Alter, Geschlecht)
+// Zustimmung zur Teilnahme
+var check_consent = function(elem) {
+  if (document.getElementById('consent_checkbox').checked) {
+    return true;
+  }
+  else {
+    alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
+    return false;
+  }
+  return false;
+};
+
+var trial1 = {
+  type:'external-html',
+  url: "external_page.html",
+  cont_btn: "start",
+  check_fn: check_consent
+};
+//timeline.push(trials);
+
 
   /*Erklärung*/
   var instructions = {
     type: "html-keyboard-response",
     stimulus: `
-      <p>Bei diesem Experiment werden 4 weiße Kreise auf dem Bildschirm angezeigt.</p><p>Bitte legen Sie Ihre Finger auf die Tasten <strong>Y,X</strong> und <strong>N,M,</strong> diese repräsentieren je einen der Kreise</p>
-      <p>Wird aus einem weißen Kreis ein <strong>dunkel-grauer Kreis</strong>, so drücken Sie bitte so schnell Sie können die dazugehörige Taste.</p>
+      <p>Bei diesem Experiment werden 4 Kästchen auf dem Bildschirm angezeigt, von denen immer genau eines grau ist.</p><p>Bitte legen Sie Ihre Finger auf die Tasten <strong>Y,X</strong> und <strong>N,M,</strong> diese repräsentieren je eines der Kästchen</p>
+      <p>Drücken Sie bitte so schnell Sie können die Taste an der Stelle, an  der das graue Kästchen erscheint.</p>
+      <p>Achtung: Sobald Sie eine Taste drücken beginnt das Experiment.</p>
       <p><strong>Beispiel:</strong></p>
-      <div style='width: 1000px; height: 400px;'>
-        <div style='float: left;'><img src='img/weiß.png' width="250" height="250"></img></div>
-        <div style='float: left;'><img src='img/weiß.png' width="250" height="250"></img></div>
-        <div style='float: left;'><img src='img/grau.png' width="250" height="250"></img>
-          <p class='small'><strong>Drücken Sie N</strong></p></div>
-        <div style='float: left;'><img src='img/weiß.png' width="250" height="250"></img></div>
-      </div>
+        <div><img src='img/unknown.png'></img>
+          <p class='small'><strong>Drücken Sie x</strong></p>
+        </div>
       <br>
-      <p>Drücken Sie eine beliebige Taste um anzufangen.</p>
     `,
     post_trial_gap: 2000
   };
@@ -67,18 +85,26 @@ var welcome = {
         data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
       }
   }
-  
+  //Reihenfolge ABADBCDACBDC -> yxymxnmynxmn
     var test_stimuli = [
       {target: [0,0], correct_response: 'y'},
       {target: [0,1], correct_response: 'x'},
+      {target: [0,0], correct_response: 'y'},
+      {target: [0,3], correct_response: 'm'},
+      {target: [0,1], correct_response: 'x'},
       {target: [0,2], correct_response: 'n'},
-      {target: [0,3], correct_response: 'm'}
+      {target: [0,3], correct_response: 'm'},
+      {target: [0,0], correct_response: 'y'},
+      {target: [0,2], correct_response: 'n'},
+      {target: [0,1], correct_response: 'x'},
+      {target: [0,3], correct_response: 'm'},
+      {target: [0,2], correct_response: 'n'}
     ];
 
     var test_procedure = {
-      timeline: [trial],
+      timeline: [trial1, trial],
       timeline_variables: test_stimuli,
-      repetitions: 5,
+      repetitions: 1,
       //randomize_order: true
     }
     timeline.push(test_procedure);
