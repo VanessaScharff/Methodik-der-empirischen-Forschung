@@ -6,6 +6,7 @@
     <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-image-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-preload.js"></script>
+    <script src="jspsych-6.3.0/plugins/jspsych-survey-html-form.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-serial-reaction-time.js"></script>
     <link href="jspsych-6.3.0/css/jspsych.css" rel="stylesheet" type="text/css">
   </head>
@@ -15,7 +16,7 @@
 var timeline = [];
 
 /*TODO:
-- Frage zum Alter und Geschlecht (Formular??)
+X Frage zum Alter und Geschlecht (Formular??)
 X Willkommen+Aufgabe anpassen mit den später gezeigten Kästchen
 X korrekte Reihenfolge implementieren
 - Zuordnung zu einer der 3 Gruppen
@@ -44,14 +45,14 @@ var check_consent = function(elem) {
   return false;
 };
 
-var trial1 = {
-  type:'external-html',
-  url: "external_page.html",
-  cont_btn: "start",
-  check_fn: check_consent
+var form_trial = {
+  type: 'survey-html-form',
+  preamble: '<p> Bitte geben Sie hier Ihre Informationen an.</p>',
+  html: '<label for="alter"><strong>Alter: </strong><input id="alter" name="alter" type="number" min="1" max="100" step="1"> Jahre</label><br><label for="geschlecht"><strong>Geschlecht: </strong><div><input type="radio" id="männlich" name="gender" value="männlich"><label for="männlich">Männlich</label><br><input type="radio" id="weiblich" name="gender" value="weiblich"><label for="weiblich">Weiblich</label><br><input type="radio" id="divers" name="gender" value="divers"><label for="divers">Divers</label></label></div><br>',
+  button_label: 'Weiter',
+  dataAsArray:true
 };
-//timeline.push(trials);
-
+timeline.push(form_trial);
 
   /*Erklärung*/
   var instructions = {
@@ -100,9 +101,10 @@ var trial1 = {
       {target: [0,3], correct_response: 'm'},
       {target: [0,2], correct_response: 'n'}
     ];
-
+  //2.Reihenfolge ACDBADCBDABC
+  
     var test_procedure = {
-      timeline: [trial1, trial],
+      timeline: [trial],
       timeline_variables: test_stimuli,
       repetitions: 1,
       //randomize_order: true
