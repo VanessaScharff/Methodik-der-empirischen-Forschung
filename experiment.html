@@ -6,6 +6,7 @@
     <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-image-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-preload.js"></script>
+    <script src="jspsych-6.3.0/plugins/jspsych-call-function.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-survey-html-form.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-serial-reaction-time.js"></script>
     <link href="jspsych-6.3.0/css/jspsych.css" rel="stylesheet" type="text/css">
@@ -19,9 +20,9 @@ var timeline = [];
 X Frage zum Alter und Geschlecht (Formular??)
 X Willkommen+Aufgabe anpassen mit den später gezeigten Kästchen
 X korrekte Reihenfolge implementieren
-- Zuordnung zu einer der 3 Gruppen
-- 2. Reihenfolge implementieren
-- Musik, Störgeräusche und blank den Gruppen zuordnen
+X Zuordnung zu einer der 3 Gruppen
+X 2. Reihenfolge implementieren
+- Musik, Störgeräusche und blank 
 - Datenbank zum Speichern der Ergebnisse
 */
 
@@ -101,8 +102,60 @@ timeline.push(form_trial);
       {target: [0,3], correct_response: 'm'},
       {target: [0,2], correct_response: 'n'}
     ];
-  //2.Reihenfolge ACDBADCBDABC
-  
+
+var audio = null;
+
+//Einteilung Musikgruppen
+var start_audio1 = {
+  type: 'call-function',
+  func: function(){
+    audio = new Audio();
+    var r = Math.random()*3;
+    if (r<1){
+      audio.src = "drumsolomono.mp3";
+      audio.loop = true;
+      audio.play();
+      return 'Gruppe1';
+    }
+    else if (r<2){
+      audio.src = "drumsolomono.mp3";
+      audio.loop = true;
+      audio.play();
+      return 'Gruppe2';
+    }
+    else{
+      audio.src = "drumsolomono.mp3";
+      audio.loop = true;
+      audio.play();
+      return 'Gruppe3';
+    }
+  }
+}
+
+var stop_audio = {
+  type: 'call-function',
+  func: function(){
+    audio.pause();
+  }
+}
+
+  //2.Reihenfolge ACDBADCBDABC -> ynmxymnxmyxn
+  var test_stimuli2 = [
+      {target: [0,0], correct_response: 'y'},
+      {target: [0,2], correct_response: 'n'},
+      {target: [0,3], correct_response: 'm'},
+      {target: [0,1], correct_response: 'x'},
+      {target: [0,0], correct_response: 'y'},
+      {target: [0,3], correct_response: 'm'},
+      {target: [0,2], correct_response: 'n'},
+      {target: [0,1], correct_response: 'x'},
+      {target: [0,3], correct_response: 'm'},
+      {target: [0,0], correct_response: 'y'},
+      {target: [0,1], correct_response: 'x'},
+      {target: [0,2], correct_response: 'n'}
+    ];
+
+    //Erster Durchlauf
     var test_procedure = {
       timeline: [trial],
       timeline_variables: test_stimuli,
@@ -110,6 +163,37 @@ timeline.push(form_trial);
       //randomize_order: true
     }
     timeline.push(test_procedure);
+
+    /*
+    //Video
+    var test_procedure1 = {
+      timeline: [trial],
+      timeline_variables:,
+      repetitions: 1,
+      //randomize_order: true
+    }
+    timeline.push(test_procedure1);
+*/
+    //Durchlauf 2 mit Gruppeneinteilung
+    var test_startAudio ={
+      timeline:[start_audio1],
+      repetitions:1
+    }
+    timeline.push(test_startAudio);
+
+    var test_procedure2 = {
+      timeline: [trial],
+      timeline_variables: test_stimuli2,
+      repetitions: 1,
+    }
+    timeline.push(test_procedure2);
+
+    //Audio beenden
+    var test_stopAudio ={
+      timeline: [stop_audio],
+      repetitions:1
+    }
+    timeline.push(test_stopAudio);
 
     /* define debrief */
     var debrief_block = {
