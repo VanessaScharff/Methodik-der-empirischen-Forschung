@@ -6,6 +6,7 @@
     <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-image-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-preload.js"></script>
+    <script src="jspsych-6.3.0/plugins/jspsych-video-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-call-function.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-survey-html-form.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-serial-reaction-time.js"></script>
@@ -22,7 +23,9 @@ X Willkommen+Aufgabe anpassen mit den später gezeigten Kästchen
 X korrekte Reihenfolge implementieren
 X Zuordnung zu einer der 3 Gruppen
 X 2. Reihenfolge implementieren
-- Musik, Störgeräusche und blank 
+X Musik, Störgeräusche und blank 
+- Video als Zwischensequenz
+X Kompletter Durchlauf mit random Sequenzen
 - Datenbank zum Speichern der Ergebnisse
 */
 
@@ -46,6 +49,7 @@ var check_consent = function(elem) {
   return false;
 };
 
+//Alter und Geschlecht angeben
 var form_trial = {
   type: 'survey-html-form',
   preamble: '<p> Bitte geben Sie hier Ihre Informationen an.</p>',
@@ -55,7 +59,7 @@ var form_trial = {
 };
 timeline.push(form_trial);
 
-  /*Erklärung*/
+  //Erklärung
   var instructions = {
     type: "html-keyboard-response",
     stimulus: `
@@ -73,7 +77,7 @@ timeline.push(form_trial);
   timeline.push(instructions);
 
 
-  /* test trials */
+  //test trials 
   var trial = {
   type: 'serial-reaction-time',
   grid: [[1,1,1,1]],
@@ -103,8 +107,19 @@ timeline.push(form_trial);
       {target: [0,2], correct_response: 'n'}
     ];
 
-var audio = null;
+    /*
+  jsPsych.init.override_safe_mode = true;
 
+  var video = {
+    type: "video-keyboard-response",
+    stimulus:`<video><source src="sample-mp4-file.mp4" type="video/mp4"/></video>`,
+    autoplay: true,
+    trial_ends_after_video: true,
+    };
+  timeline.push(video);
+*/
+
+var audio = null;
 //Einteilung Musikgruppen
 var start_audio1 = {
   type: 'call-function',
@@ -112,22 +127,25 @@ var start_audio1 = {
     audio = new Audio();
     var r = Math.random()*3;
     if (r<1){
-      audio.src = "drumsolomono.mp3";
+      audio.src = "Krach.mp3";
       audio.loop = true;
+      audio.volume = 0.2;
       audio.play();
-      return 'Gruppe1';
+      return 'Gruppe1: Krach';
     }
     else if (r<2){
-      audio.src = "drumsolomono.mp3";
+      audio.src = "";
       audio.loop = true;
+      audio.volume = 0.2;
       audio.play();
-      return 'Gruppe2';
+      return 'Gruppe2: Nichts';
     }
     else{
-      audio.src = "drumsolomono.mp3";
+      audio.src = "LoFi.mp3";
       audio.loop = true;
+      audio.volume = 0.2;
       audio.play();
-      return 'Gruppe3';
+      return 'Gruppe3: LoFi';
     }
   }
 }
@@ -155,16 +173,37 @@ var stop_audio = {
       {target: [0,2], correct_response: 'n'}
     ];
 
-    //Erster Durchlauf
+    //Zufällige Durchläufe erzeugen
+    var random_procedure = {
+    timeline: [trial],
+    repetitions: 5,
+    timeline_variables:[
+    {target: [0,0], correct_response: 'y'},
+    {target: [0,1], correct_response: 'x'},
+    {target: [0,2], correct_response: 'n'},
+    {target: [0,3], correct_response: 'm'}
+    ],
+    sample:{
+      type: 'with-replacement',
+      size: 12, 
+    }
+  }
+
+    //5 Zufällige Blöcke
+    timeline.push(random_procedure);
+
+    //10 sequentielle Blöcke
     var test_procedure = {
       timeline: [trial],
       timeline_variables: test_stimuli,
-      repetitions: 1,
-      //randomize_order: true
+      repetitions: 10,
     }
     timeline.push(test_procedure);
 
-    /*
+    //5 Zufällige Blöcke
+    timeline.push(random_procedure);
+
+/*
     //Video
     var test_procedure1 = {
       timeline: [trial],
@@ -174,19 +213,26 @@ var stop_audio = {
     }
     timeline.push(test_procedure1);
 */
-    //Durchlauf 2 mit Gruppeneinteilung
+    //Durchlauf 2 mit Gruppeneinteilung, Audio beginnt
     var test_startAudio ={
       timeline:[start_audio1],
       repetitions:1
     }
     timeline.push(test_startAudio);
 
+    //5 Zufällige Blöcke
+    timeline.push(random_procedure);
+
+    //10 sequenzielle Durchläufe
     var test_procedure2 = {
       timeline: [trial],
       timeline_variables: test_stimuli2,
-      repetitions: 1,
+      repetitions: 10,
     }
     timeline.push(test_procedure2);
+
+    //5 Zufällige Blöcke
+    timeline.push(random_procedure);
 
     //Audio beenden
     var test_stopAudio ={
@@ -217,6 +263,8 @@ var stop_audio = {
     /* start the experiment */
     jsPsych.init({
       timeline: timeline,
+      show_progress_bar: true,
+      auto_update_progress_bar: true,
       on_finish: function() {
         jsPsych.data.displayData();
       }

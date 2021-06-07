@@ -58,7 +58,7 @@ jsPsych.plugins["serial-reaction-time"] = (function() {
       pre_target_duration: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'Pre-target duration',
-        default: 0,
+        default: 200,
         description: 'The number of milliseconds to display the grid before the target changes color.'
       },
       trial_duration: {
