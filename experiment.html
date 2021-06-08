@@ -5,7 +5,7 @@
     <script src="jspsych-6.3.0/jspsych.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-html-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-image-keyboard-response.js"></script>
-    <script src="jspsych-6.3.0/plugins/jspsych-preload.js"></script>
+
     <script src="jspsych-6.3.0/plugins/jspsych-video-keyboard-response.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-call-function.js"></script>
     <script src="jspsych-6.3.0/plugins/jspsych-survey-html-form.js"></script>
@@ -36,24 +36,11 @@ var welcome = {
   };
   timeline.push(welcome);
 
-// Persönliche Angaben (Alter, Geschlecht)
-// Zustimmung zur Teilnahme
-var check_consent = function(elem) {
-  if (document.getElementById('consent_checkbox').checked) {
-    return true;
-  }
-  else {
-    alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
-    return false;
-  }
-  return false;
-};
-
 //Alter und Geschlecht angeben
 var form_trial = {
   type: 'survey-html-form',
   preamble: '<p> Bitte geben Sie hier Ihre Informationen an.</p>',
-  html: '<label for="alter"><strong>Alter: </strong><input id="alter" name="alter" type="number" min="1" max="100" step="1"> Jahre</label><br><label for="geschlecht"><strong>Geschlecht: </strong><div><input type="radio" id="männlich" name="gender" value="männlich"><label for="männlich">Männlich</label><br><input type="radio" id="weiblich" name="gender" value="weiblich"><label for="weiblich">Weiblich</label><br><input type="radio" id="divers" name="gender" value="divers"><label for="divers">Divers</label></label></div><br>',
+  html: '<label for="alter"><strong>Alter: </strong><input id="alter" name="alter" type="number" min="1" max="100" step="1"> Jahre</label><br><label for="geschlecht"><strong>Geschlecht: </strong><div><input type="radio" id="männlich" name="geschlecht" value="männlich"><label for="männlich">Männlich</label><br><input type="radio" id="weiblich" name="geschlecht" value="weiblich"><label for="weiblich">Weiblich</label><br><input type="radio" id="divers" name="geschlecht" value="divers"><label for="divers">Divers</label></label></div><br>',
   button_label: 'Weiter',
   dataAsArray:true
 };
@@ -72,7 +59,7 @@ timeline.push(form_trial);
         </div>
       <br>
     `,
-    post_trial_gap: 2000
+    post_trial_gap: 1800
   };
   timeline.push(instructions);
 
@@ -106,18 +93,6 @@ timeline.push(form_trial);
       {target: [0,3], correct_response: 'm'},
       {target: [0,2], correct_response: 'n'}
     ];
-
-    /*
-  jsPsych.init.override_safe_mode = true;
-
-  var video = {
-    type: "video-keyboard-response",
-    stimulus:`<video><source src="sample-mp4-file.mp4" type="video/mp4"/></video>`,
-    autoplay: true,
-    trial_ends_after_video: true,
-    };
-  timeline.push(video);
-*/
 
 var audio = null;
 //Einteilung Musikgruppen
@@ -203,16 +178,16 @@ var stop_audio = {
     //5 Zufällige Blöcke
     timeline.push(random_procedure);
 
-/*
-    //Video
-    var test_procedure1 = {
-      timeline: [trial],
-      timeline_variables:,
-      repetitions: 1,
-      //randomize_order: true
-    }
-    timeline.push(test_procedure1);
-*/
+
+  var video = {
+    type: "video-keyboard-response",
+    stimulus:'sample-mp4-file.mp4',
+    autoplay: true,
+    trial_ends_after_video: true,
+    };
+  timeline.push(video);
+
+
     //Durchlauf 2 mit Gruppeneinteilung, Audio beginnt
     var test_startAudio ={
       timeline:[start_audio1],
@@ -264,6 +239,7 @@ var stop_audio = {
     jsPsych.init({
       timeline: timeline,
       show_progress_bar: true,
+      override_safe_mode: true,
       auto_update_progress_bar: true,
       on_finish: function() {
         jsPsych.data.displayData();
