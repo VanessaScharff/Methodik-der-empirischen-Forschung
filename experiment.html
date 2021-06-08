@@ -151,7 +151,7 @@ var stop_audio = {
     //Zufällige Durchläufe erzeugen
     var random_procedure = {
     timeline: [trial],
-    repetitions: 5,
+    repetitions: 1,
     timeline_variables:[
     {target: [0,0], correct_response: 'y'},
     {target: [0,1], correct_response: 'x'},
@@ -181,7 +181,7 @@ var stop_audio = {
 
   var video = {
     type: "video-keyboard-response",
-    stimulus:'sample-mp4-file.mp4',
+    stimulus:`<video><source src="sample-mp4-file.mp4" type="video/mp4"></video>`,
     autoplay: true,
     trial_ends_after_video: true,
     };
