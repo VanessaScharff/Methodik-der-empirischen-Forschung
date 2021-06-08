@@ -180,10 +180,11 @@ var stop_audio = {
 
 
   var video = {
-    type: "video-keyboard-response",
-    stimulus:`<video><source src="sample-mp4-file.mp4" type="video/mp4"></video>`,
-    autoplay: true,
-    trial_ends_after_video: true,
+    type: "html-keyboard-response",
+    stimulus:`<p>Kurze Verschnaufpause, hier ein kurzes Video zur Entspannung:</p><p>Nach dem Video geht es weiter mit dem Experiment</p><video autoplay><source src="sample-mp4-file.mp4" type="video/mp4"></video>`,
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 20000,
+    post_trial_gap: 1800,
     };
   timeline.push(video);
 
